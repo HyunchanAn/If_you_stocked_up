@@ -4,17 +4,24 @@ import { Button } from '../../../components/ui/Button';
 import { SimpleLineChart } from '../../../components/ui/Chart';
 import { Award, ArrowLeftRight, Bitcoin, Coins } from 'lucide-react';
 import { format } from 'date-fns';
-import type { MarketData } from '../../../services/mockDataGenerator';
+import type { MarketData } from '../../../services/apiService';
 
 export function ReportScreen() {
-    const { initialMoney, balance, ownedQuantity, marketData, resetSimulation } = useSimulationStore();
+    const { initialMoney, balance, portfolios, marketData, activeSymbol, resetSimulation } = useSimulationStore();
 
-    if (marketData.length === 0) return null;
+    if (!activeSymbol || !marketData[activeSymbol] || marketData[activeSymbol].length === 0) return null;
 
-    const lastData = marketData[marketData.length - 1];
-    const firstData = marketData[0];
+    const activeData = marketData[activeSymbol];
+    const lastData = activeData[activeData.length - 1];
+    const firstData = activeData[0];
 
-    const finalStockValue = ownedQuantity * lastData.price;
+    let finalStockValue = 0;
+    Object.entries(portfolios).forEach(([sym, portfolio]) => {
+        const symData = marketData[sym];
+        const currentPrice = symData ? symData[symData.length - 1].price : 0;
+        finalStockValue += portfolio.ownedQuantity * currentPrice;
+    });
+
     const finalAssets = balance + finalStockValue;
     const totalProfit = finalAssets - initialMoney;
     const profitRate = (totalProfit / initialMoney) * 100;
@@ -26,26 +33,15 @@ export function ReportScreen() {
     else if (stockRatio > 0.5) styleTitle = '적극 투자형';
     else if (stockRatio > 0.2) styleTitle = '위험 중립형';
 
-    // 자산 비교 분석 로직 (비트코인, 금)
-    const btcStartPrice = firstData.bitcoin;
-    const btcEndPrice = lastData.bitcoin;
-    const btcProfitRate = ((btcEndPrice - btcStartPrice) / btcStartPrice) * 100;
 
-    const goldStartPrice = firstData.gold;
-    const goldEndPrice = lastData.gold;
-    const goldProfitRate = ((goldEndPrice - goldStartPrice) / goldStartPrice) * 100;
 
-    // 차트를 위한 비교 데이터 생성
-    const comparisonData = marketData.map((d: MarketData) => {
+    // 차트를 위한 비교 데이터 생성 (대표 종목 기준)
+    const comparisonData = activeData.map((d: MarketData) => {
         // 100을 기준으로 한 지수(Index)화
-        const myIndex = d.price / firstData.price * 100; // 단순 주가 기준 비교 (또는 자산 추이)
-        const btcIndex = d.bitcoin / firstData.bitcoin * 100;
-        const goldIndex = d.gold / firstData.gold * 100;
+        const myIndex = d.price / firstData.price * 100;
         return {
             date: d.date,
-            '내 투자금(주가기준)': Math.round(myIndex),
-            '비트코인': Math.round(btcIndex),
-            '금': Math.round(goldIndex)
+            '내 투자금(주가기준)': Math.round(myIndex)
         };
     });
 
@@ -116,26 +112,8 @@ export function ReportScreen() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-4 pt-2">
-                                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
-                                    <div className="flex items-center gap-2">
-                                        <Bitcoin className="text-orange-500" />
-                                        <span className="font-semibold">비트코인(BTC)</span>
-                                    </div>
-                                    <div className={`font-bold ${btcProfitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                                        {btcProfitRate >= 0 ? '+' : ''}{btcProfitRate.toFixed(2)}%
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
-                                    <div className="flex items-center gap-2">
-                                        <Coins className="text-yellow-600" />
-                                        <span className="font-semibold">안전자산(금)</span>
-                                    </div>
-                                    <div className={`font-bold ${goldProfitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                                        {goldProfitRate >= 0 ? '+' : ''}{goldProfitRate.toFixed(2)}%
-                                    </div>
-                                </div>
+                            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-center text-gray-500">
+                                현재 실거래 API 연동으로 인해 타 자산(비트코인, 금)과의 실시간 비교 기능은 준비 중입니다.
                             </div>
                         </CardContent>
                     </Card>

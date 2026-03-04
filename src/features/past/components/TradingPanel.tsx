@@ -6,11 +6,13 @@ import { Input } from '../../../components/ui/Input';
 import { ShoppingCart } from 'lucide-react';
 
 export function TradingPanel() {
-    const { balance, ownedQuantity, buyStock, sellStock, marketData, currentIndex, status } = useSimulationStore();
+    const { balance, activeSymbol, portfolios, buyStock, sellStock, marketData, currentIndex, status } = useSimulationStore();
     const [quantity, setQuantity] = useState('1');
     const [toastMsg, setToastMsg] = useState('');
 
-    const currentPrice = marketData[currentIndex]?.price || 0;
+    const currentPrice = (activeSymbol && marketData[activeSymbol]?.[currentIndex]?.price) || 0;
+    const ownedQuantity = (activeSymbol && portfolios[activeSymbol]?.ownedQuantity) || 0;
+
     const numQuantity = parseInt(quantity.replace(/[^0-9]/g, '') || '0', 10);
     const totalCost = currentPrice * numQuantity;
 
@@ -47,7 +49,7 @@ export function TradingPanel() {
             <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
                 <CardTitle className="text-lg font-bold flex items-center gap-2">
                     <ShoppingCart size={20} className="text-blue-500" />
-                    빠른 매매
+                    빠른 매매 {activeSymbol && `(${activeSymbol})`}
                 </CardTitle>
             </CardHeader>
 
@@ -61,11 +63,27 @@ export function TradingPanel() {
                     </div>
 
                     <div className="space-y-2">
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+                            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">현재 보유량</span>
+                            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{ownedQuantity} 주</span>
+                        </div>
+
+                        <div className="flex justify-between mt-4">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">주문 수량</label>
-                            <span className="text-xs text-blue-600 dark:text-blue-400 cursor-pointer hover:underline" onClick={() => setQuantity(maxBuyQuantity.toString())}>
-                                최대 매수: {maxBuyQuantity}주
-                            </span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setQuantity(maxBuyQuantity.toString())}
+                                    className="text-xs px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded border border-red-200"
+                                >
+                                    전액 매수
+                                </button>
+                                <button
+                                    onClick={() => setQuantity(ownedQuantity.toString())}
+                                    className="text-xs px-2 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded border border-blue-200"
+                                >
+                                    전량 매도
+                                </button>
+                            </div>
                         </div>
                         <div className="flex gap-2">
                             <Input
