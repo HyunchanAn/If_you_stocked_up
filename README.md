@@ -1,73 +1,40 @@
-# React + TypeScript + Vite
+# If You Stocked Up 📈
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+"아... 그때 그 주식 샀어야 했는데!"
+우리가 살면서 수없이 해왔던 이 후회를 직접 실험해보고, 나아가 시장의 흐름을 읽는 눈을 기르기 위해 만든 **주식 시뮬레이션 & 가상 투자 웹 애플리케이션**입니다.
 
-Currently, two official plugins are available:
+## 🚀 초기 기획
+처음에는 단순히 "과거의 특정 시점으로 돌아가서 투자를 해보면 어떨까?" 라는 호기심에서 출발했습니다. 
+이미 결과치를 아는 상태에서 결과를 보는 것이 아니라, 실제 과거의 차트가 서서히 그려지는 것을 보며 **'지금 당장 매수/매도 버튼을 눌러야 할까?'**를 고민하게 만드는 훈련 도구를 만들고 싶었습니다. 
+나아가 현재 진행 중인 실시간 주식시장에서도 리스크 없이 가상 투자를 해볼 수 있도록 두 가지 주요 모드를 갖춘 플랫폼으로 기획했습니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 💻 현재 구현된 기능 (Current Status)
 
-## React Compiler
+현재 프로젝트는 Yahoo Finance API를 연동하여 실제 시장 데이터를 바탕으로 다음 기능들을 성공적으로 구현하여 동작하고 있습니다.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. 과거 모의투자 (Past Simulation)
+* **다중 종목 시뮬레이션**: 여러 종목의 티커(예: AAPL, MSFT, 005930.KS)를 같이 입력해 개별 종목 탭을 넘나들며 시뮬레이션할 수 있습니다. 여러 종목의 잔고를 합산하여 총 포트폴리오 자산과 수익률을 계산합니다.
+* **리얼한 캔들스틱 차트**: 시가, 종가, 고가, 저가를 모두 반영한 캔들 차트를 렌더링하며, 직관적인 파악을 위해 상승은 빨간색, 하락은 파란색으로 표시했습니다.
+* **직관적인 속도 조절**: 단순 'n배속'이 아니라 **'1일을 1초로'**, **'1시간을 1초로'** 등 현실 시간과 비례하는 프리셋을 설정할 수 있으며, 원하는 속도를 커스텀으로 입력할 수도 있습니다.
+* **매일 자동 일시정지**: 하루하루 흐름을 끊어서 집중적으로 차트를 분석하고 매매할 수 있도록 돕는 자동 일시정지 옵션을 제공합니다.
 
-## Expanding the ESLint configuration
+### 2. 현재 가상투자 (Live Virtual Trading)
+* **실시간 데이터 연동**: 현재 거래되는 주식의 실시간 가격을 주기적으로 가져와 가상 잔고로 트레이딩 할 수 있습니다.
+* **종목 검색 및 전환**: 언제든지 원하는 새로운 주식 종목 티커를 검색하여 투자 타겟을 변경할 수 있습니다.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 💡 앞으로의 계획 & 추가하면 좋을 기능 (Future Plans)
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+개발을 진행하면서 앞으로 시간을 내어 꼭 추가하고 싶은 욕심나는 기능들입니다.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- [ ] **세이브 & 로드 기능**: 로컬 스토리지나 백엔드 DB를 연결하여 진행 중인 시뮬레이션 상태를 저장하고 나중에 이어서 할 수 있는 기능
+- [ ] **보조 지표 추가**: 거래량 차트 기둥이나 이동평균선(MA), RSI, MACD 등의 핵심 기술적 지표를 차트에 띄울 수 있는 옵션
+- [ ] **공매도(Short Selling) 시스템**: 장이 하락할 때도 시장 흐름에 맞춰 수익을 낼 수 있도록 하는 기능
+- [ ] **결과 공유 및 리더보드 (게임화)**: 특정 과거 기간의 투자 수익률 결과를 친구들에게 공유하고 순위를 매기는 미니 게임 요소 도입
+- [ ] **모바일 UI 최적화**: 출퇴근 길에 스마트폰에서도 편하게 차트를 보고 매매할 수 있도록 완벽한 반응형 뷰 지원
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🛠️ 기술 스택 (Tech Stack)
+- **Frontend**: React, TypeScript, Tailwind CSS, Zustand, Recharts
+- **Build Tool / Proxy Setup**: Vite
+- **Data Source**: Yahoo Finance API (Vite Proxy를 활용한 CORS 해결)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+이 프로젝트를 뼈대로 삼아 앞으로도 틈틈이 새로운 모듈들을 추가하며 고도화해 나갈 계획입니다.
