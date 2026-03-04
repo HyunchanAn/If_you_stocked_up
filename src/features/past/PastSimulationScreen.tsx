@@ -12,7 +12,7 @@ import { subDays, subMonths, subYears, startOfYear } from 'date-fns';
 type ViewRange = 'sim' | '1d' | '5d' | '1mo' | '6mo' | 'ytd' | '1y' | '5y' | 'max';
 
 export function PastSimulationScreen() {
-    const { status, symbols, activeSymbol, setActiveSymbol, marketData, preSimulationData, currentIndex, startDate } = useSimulationStore();
+    const { status, symbols, activeSymbol, setActiveSymbol, marketData, preSimulationData, tradeHistory, currentIndex, startDate } = useSimulationStore();
     const [viewRange, setViewRange] = useState<ViewRange>('sim');
 
     // 활성 종목의 이전 차트 내역
@@ -25,25 +25,47 @@ export function PastSimulationScreen() {
 
     // viewRange에 맞춰서 이전 데이터 잘라내고 + 시뮬레이션 데이터 이어붙이기
     const chartData = useMemo(() => {
-        if (viewRange === 'sim' || !startDate) return activeSimData;
+        let baseData = activeSimData;
 
-        let cutoffDate: Date | null = null;
-        switch (viewRange) {
-            case '1d': cutoffDate = subDays(startDate, 1); break;
-            case '5d': cutoffDate = subDays(startDate, 5); break;
-            case '1mo': cutoffDate = subMonths(startDate, 1); break;
-            case '6mo': cutoffDate = subMonths(startDate, 6); break;
-            case 'ytd': cutoffDate = startOfYear(startDate); break;
-            case '1y': cutoffDate = subYears(startDate, 1); break;
-            case '5y': cutoffDate = subYears(startDate, 5); break;
-            case 'max': cutoffDate = new Date('1900-01-01'); break;
+        if (viewRange !== 'sim' && startDate) {
+            let cutoffDate: Date | null = null;
+            switch (viewRange) {
+                case '1d': cutoffDate = subDays(startDate, 1); break;
+                case '5d': cutoffDate = subDays(startDate, 5); break;
+                case '1mo': cutoffDate = subMonths(startDate, 1); break;
+                case '6mo': cutoffDate = subMonths(startDate, 6); break;
+                case 'ytd': cutoffDate = startOfYear(startDate); break;
+                case '1y': cutoffDate = subYears(startDate, 1); break;
+                case '5y': cutoffDate = subYears(startDate, 5); break;
+                case 'max': cutoffDate = new Date('1900-01-01'); break;
+            }
+
+            if (cutoffDate) {
+                const filteredPreSim = preSimData.filter(d => new Date(d.date) >= cutoffDate!);
+                baseData = [...filteredPreSim, ...activeSimData];
+            }
         }
 
-        if (!cutoffDate) return activeSimData;
+        // 매매 내역(Trade History) 병합
+        const trades = activeSymbol && tradeHistory[activeSymbol] ? tradeHistory[activeSymbol] : [];
+        if (trades.length === 0) return baseData;
 
-        const filteredPreSim = preSimData.filter(d => new Date(d.date) >= cutoffDate!);
-        return [...filteredPreSim, ...activeSimData];
-    }, [viewRange, activeSimData, preSimData, startDate]);
+        return baseData.map(d => {
+            const dayTrades = trades.filter(t => t.date === d.date);
+            if (dayTrades.length === 0) return d;
+
+            // 같은 날 여러 번 샀을 경우 마지막 거래 가격 혹은 평균을 보여줄 수 있음. 여기서는 마지막 거래를 표시.
+            const buyTrade = dayTrades.filter(t => t.type === 'buy').pop();
+            const sellTrade = dayTrades.filter(t => t.type === 'sell').pop();
+
+            return {
+                ...d,
+                ...(buyTrade && { buyPrice: buyTrade.price }),
+                ...(sellTrade && { sellPrice: sellTrade.price })
+            };
+        });
+
+    }, [viewRange, activeSimData, preSimData, startDate, tradeHistory, activeSymbol]);
 
     if (status === 'idle') {
         return <SimulationSetup />;
