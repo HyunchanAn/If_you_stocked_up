@@ -1,0 +1,43 @@
+
+> if-you-stocked-up@0.0.0 build
+> tsc -b && vite build
+
+src/components/layout/Header.tsx(2,39): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/Layout.tsx(1,10): error TS1484: 'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/layout/Sidebar.tsx(1,42): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Button.tsx(1,10): error TS1484: 'ButtonHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/Card.tsx(1,10): error TS1484: 'HTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/Chart.tsx(9,8): error TS2307: Cannot find module 'recharts' or its corresponding type declarations.
+src/components/ui/Chart.tsx(43,41): error TS7006: Parameter 'value' implicitly has an 'any' type.
+src/components/ui/Input.tsx(1,10): error TS1484: 'InputHTMLAttributes' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/features/current/CurrentTradingScreen.tsx(7,60): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/PortfolioSummary.tsx(3,46): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(5,55): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(6,24): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(7,10): error TS1484: 'MarketData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/features/past/components/SimulationSetup.tsx(6,38): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/SimulationSetup.tsx(7,51): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/features/past/components/TimeController.tsx(5,49): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/TradingPanel.tsx(6,30): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/lib/utils.ts(1,39): error TS2307: Cannot find module 'clsx' or its corresponding type declarations.
+src/lib/utils.ts(2,25): error TS2307: Cannot find module 'tailwind-merge' or its corresponding type declarations.
+src/services/mockDataGenerator.ts(1,33): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/store/useCurrentTradingStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useCurrentTradingStore.ts(20,68): error TS7006: Parameter 'set' implicitly has an 'any' type.
+src/store/useCurrentTradingStore.ts(20,73): error TS7006: Parameter 'get' implicitly has an 'any' type.
+src/store/useCurrentTradingStore.ts(27,11): error TS7006: Parameter 'quantity' implicitly has an 'any' type.
+src/store/useCurrentTradingStore.ts(45,12): error TS7006: Parameter 'quantity' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useSimulationStore.ts(2,28): error TS1484: 'MarketData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/store/useSimulationStore.ts(34,60): error TS7006: Parameter 'set' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(34,65): error TS7006: Parameter 'get' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(48,23): error TS7006: Parameter 'start' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(48,30): error TS7006: Parameter 'end' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(48,35): error TS7006: Parameter 'money' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(67,16): error TS7006: Parameter 'speed' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(78,16): error TS7006: Parameter 'quantity' implicitly has an 'any' type.
+src/store/useSimulationStore.ts(97,17): error TS7006: Parameter 'quantity' implicitly has an 'any' type.
+src/store/useStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useStore.ts(13,46): error TS7006: Parameter 'set' implicitly has an 'any' type.
+src/store/useStore.ts(16,15): error TS7006: Parameter 'mode' implicitly has an 'any' type.
+src/store/useStore.ts(17,29): error TS7006: Parameter 'state' implicitly has an 'any' type.

@@ -1,0 +1,22 @@
+
+> if-you-stocked-up@0.0.0 build
+> tsc -b && vite build
+
+src/components/layout/Header.tsx(2,39): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/Sidebar.tsx(1,42): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Chart.tsx(9,8): error TS2307: Cannot find module 'recharts' or its corresponding type declarations.
+src/features/current/CurrentTradingScreen.tsx(7,60): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/PortfolioSummary.tsx(3,46): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(5,55): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(6,24): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/features/past/components/ReportScreen.tsx(7,10): error TS1484: 'MarketData' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/features/past/components/SimulationSetup.tsx(6,38): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/SimulationSetup.tsx(7,51): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/features/past/components/TimeController.tsx(5,49): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/past/components/TradingPanel.tsx(6,30): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/lib/utils.ts(1,39): error TS2307: Cannot find module 'clsx' or its corresponding type declarations.
+src/lib/utils.ts(2,25): error TS2307: Cannot find module 'tailwind-merge' or its corresponding type declarations.
+src/services/mockDataGenerator.ts(1,33): error TS2307: Cannot find module 'date-fns' or its corresponding type declarations.
+src/store/useCurrentTradingStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useSimulationStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
+src/store/useStore.ts(1,24): error TS2307: Cannot find module 'zustand' or its corresponding type declarations.
