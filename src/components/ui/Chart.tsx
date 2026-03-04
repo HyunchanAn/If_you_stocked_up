@@ -9,6 +9,7 @@ import {
     Tooltip,
     ResponsiveContainer,
     Scatter,
+    Legend,
 } from 'recharts';
 
 interface SimpleLineChartProps {
@@ -72,6 +73,10 @@ interface CandlestickChartProps {
     data: any[];
     xKey: string;
     height?: number;
+    showKospi?: boolean;
+    showKosdaq?: boolean;
+    showBitcoin?: boolean;
+    showGold?: boolean;
 }
 
 const CandleBody = (props: any) => {
@@ -152,12 +157,17 @@ export function CandlestickChart({
     data,
     xKey,
     height = 300,
+    showKospi = false,
+    showKosdaq = false,
+    showBitcoin = false,
+    showGold = false,
 }: CandlestickChartProps) {
-    // 확대/이동을 위해 최신 데이터(뒷부분)을 기본적으로 보여줄 수 있음
+    const hasSecondaryLines = showKospi || showKosdaq || showBitcoin || showGold;
+
     return (
         <div style={{ width: '100%', height }}>
             <ResponsiveContainer>
-                <ComposedChart data={data} margin={{ top: 5, right: 30, bottom: 5, left: 10 }}>
+                <ComposedChart data={data} margin={{ top: 5, right: hasSecondaryLines ? 10 : 30, bottom: 5, left: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" opacity={0.3} />
                     <XAxis
                         dataKey={xKey}
@@ -167,6 +177,7 @@ export function CandlestickChart({
                         axisLine={false}
                     />
                     <YAxis
+                        yAxisId="left"
                         stroke="#9ca3af"
                         tick={{ fontSize: 12 }}
                         tickLine={false}
@@ -174,6 +185,17 @@ export function CandlestickChart({
                         tickFormatter={(value: number) => value.toLocaleString()}
                         domain={['auto', 'auto']}
                     />
+                    {hasSecondaryLines && (
+                        <YAxis
+                            yAxisId="right"
+                            orientation="right"
+                            stroke="#9ca3af"
+                            tick={{ fontSize: 12 }}
+                            tickLine={false}
+                            axisLine={false}
+                            domain={['auto', 'auto']}
+                        />
+                    )}
                     <Tooltip
                         contentStyle={{
                             backgroundColor: '#1e293b',
@@ -183,13 +205,17 @@ export function CandlestickChart({
                         }}
                         itemStyle={{ color: '#f8fafc' }}
                         labelStyle={{ color: '#9ca3af', marginBottom: '8px' }}
-                        formatter={(value: any, name?: string) => [
-                            value.toLocaleString ? value.toLocaleString() : value,
-                            name === 'wick' ? '고가/저가' : '시가/종가'
-                        ]}
+                        formatter={(value: any, name?: string) => {
+                            if (name === 'wick') return [value.toLocaleString ? value.toLocaleString() : value, '고가/저가'];
+                            if (name === 'body') return ['...', '시가/종가']; // skip showing internal rect bounds
+                            if (['buy', 'sell'].includes(name as string)) return [value.toLocaleString(), typeToLabel(name)];
+                            return [value.toLocaleString ? value.toLocaleString() : value, name];
+                        }}
                     />
+                    {hasSecondaryLines && <Legend verticalAlign="top" height={36} />}
                     {/* 심지 (고가-저가) */}
                     <Bar
+                        yAxisId="left"
                         name="wick"
                         dataKey={(d: any) => [d.low, d.high]}
                         shape={<CandleWick />}
@@ -197,6 +223,7 @@ export function CandlestickChart({
                     />
                     {/* 몸통 (시가-종가) */}
                     <Bar
+                        yAxisId="left"
                         name="body"
                         dataKey={(d: any) => [Math.min(d.open, d.price), Math.max(d.open, d.price)]}
                         shape={<CandleBody />}
@@ -205,19 +232,34 @@ export function CandlestickChart({
 
                     {/* 매수/매도 마커 */}
                     <Scatter
+                        yAxisId="left"
                         name="buy"
                         dataKey="buyPrice"
                         shape={<TradeMarker type="buy" />}
                         isAnimationActive={false}
                     />
                     <Scatter
+                        yAxisId="left"
                         name="sell"
                         dataKey="sellPrice"
                         shape={<TradeMarker type="sell" />}
                         isAnimationActive={false}
                     />
+
+                    {/* 비교 라인들 */}
+                    {showKospi && <Line yAxisId="right" type="monotone" dataKey="kospi" name="KOSPI" stroke="#8b5cf6" dot={false} strokeWidth={2} />}
+                    {showKosdaq && <Line yAxisId="right" type="monotone" dataKey="kosdaq" name="KOSDAQ" stroke="#ec4899" dot={false} strokeWidth={2} />}
+                    {showBitcoin && <Line yAxisId="right" type="monotone" dataKey="bitcoin" name="비트코인(BTC)" stroke="#f59e0b" dot={false} strokeWidth={2} />}
+                    {showGold && <Line yAxisId="right" type="monotone" dataKey="gold" name="금(Gold)" stroke="#eab308" dot={false} strokeWidth={2} />}
+
                 </ComposedChart>
             </ResponsiveContainer>
         </div>
     );
+}
+
+function typeToLabel(type: string | undefined): string {
+    if (type === 'buy') return '매수 단가';
+    if (type === 'sell') return '매도 단가';
+    return type || '';
 }

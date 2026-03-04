@@ -1,10 +1,9 @@
 import { useSimulationStore } from '../../../store/useSimulationStore';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
-import { SimpleLineChart } from '../../../components/ui/Chart';
+import { CandlestickChart } from '../../../components/ui/Chart';
 import { Award, ArrowLeftRight, Bitcoin, Coins } from 'lucide-react';
 import { format } from 'date-fns';
-import type { MarketData } from '../../../services/apiService';
 
 export function ReportScreen() {
     const { initialMoney, balance, portfolios, marketData, activeSymbol, resetSimulation } = useSimulationStore();
@@ -33,17 +32,18 @@ export function ReportScreen() {
     else if (stockRatio > 0.5) styleTitle = '적극 투자형';
     else if (stockRatio > 0.2) styleTitle = '위험 중립형';
 
+    // 자산 비교 분석 로직 (비트코인, 금)
+    const btcStartPrice = firstData.bitcoin;
+    const btcEndPrice = lastData.bitcoin;
+    const btcProfitRate = ((btcEndPrice - btcStartPrice) / btcStartPrice) * 100;
 
+    const goldStartPrice = firstData.gold;
+    const goldEndPrice = lastData.gold;
+    const goldProfitRate = ((goldEndPrice - goldStartPrice) / goldStartPrice) * 100;
 
     // 차트를 위한 비교 데이터 생성 (대표 종목 기준)
-    const comparisonData = activeData.map((d: MarketData) => {
-        // 100을 기준으로 한 지수(Index)화
-        const myIndex = d.price / firstData.price * 100;
-        return {
-            date: d.date,
-            '내 투자금(주가기준)': Math.round(myIndex)
-        };
-    });
+
+
 
     return (
         <div className="p-4 md:p-6 h-full flex flex-col items-center overflow-y-auto">
@@ -112,22 +112,47 @@ export function ReportScreen() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-center text-gray-500">
-                                현재 실거래 API 연동으로 인해 타 자산(비트코인, 금)과의 실시간 비교 기능은 준비 중입니다.
+                            <div className="space-y-4 pt-2">
+                                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
+                                    <div className="flex items-center gap-2">
+                                        <Bitcoin className="text-orange-500" />
+                                        <span className="font-semibold">비트코인(BTC)</span>
+                                    </div>
+                                    <div className={`font-bold ${btcProfitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                        {btcProfitRate >= 0 ? '+' : ''}{btcProfitRate.toFixed(2)}%
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
+                                    <div className="flex items-center gap-2">
+                                        <Coins className="text-yellow-600" />
+                                        <span className="font-semibold">안전자산(금)</span>
+                                    </div>
+                                    <div className={`font-bold ${goldProfitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                                        {goldProfitRate >= 0 ? '+' : ''}{goldProfitRate.toFixed(2)}%
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* 비교 차트 */}
+                {/* 시뮬레이션 상세 차트 */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>수익 지수 비교 차트 (Base = 100)</CardTitle>
+                        <CardTitle>시뮬레이션 기간 상세 차트 및 주요 자산 지수</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {/* SimpleLineChart는 단일 라인만 지원하므로, 여기서 비교를 위해 두 개의 라인을 그릴 수 있도록 확장하기엔 너무 크니, 비트코인 지수만 파란색으로 그려서 간단히 보여줌 (혹은 차트 래퍼 업그레이드) */}
-                        <p className="text-xs text-gray-400 mb-4">* 본 차트는 시뮬레이션 기간 동안 대상 종목의 가격을 지수화(Index)한 선형 차트입니다.</p>
-                        <SimpleLineChart data={comparisonData} xKey="date" yKey="내 투자금(주가기준)" color="#ef4444" />
+                        <p className="text-xs text-gray-400 mb-4">* {activeSymbol}의 캔들스틱과 4가지 주요 지표(우측 축 기준)를 함께 비교해 볼 수 있습니다.</p>
+                        <CandlestickChart
+                            data={activeData}
+                            xKey="date"
+                            height={400}
+                            showKospi
+                            showKosdaq
+                            showBitcoin
+                            showGold
+                        />
                     </CardContent>
                 </Card>
 
