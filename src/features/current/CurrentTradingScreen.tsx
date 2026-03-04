@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useCurrentTradingStore } from '../../store/useCurrentTradingStore';
+import { fetchCurrentData } from '../../services/apiService';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { SimpleLineChart } from '../../components/ui/Chart';
-import { Activity, Wallet, TrendingUp, ShoppingCart } from 'lucide-react';
+import { Activity, Wallet, TrendingUp, ShoppingCart, Search } from 'lucide-react';
 
 export function CurrentTradingScreen() {
     const {
@@ -13,21 +14,45 @@ export function CurrentTradingScreen() {
         averageBuyPrice,
         currentPrice,
         dataPoints,
+        symbol,
         buy,
         sell,
-        tickPrice
+        setSymbol,
+        updateLiveData,
+        resetPortfolio
     } = useCurrentTradingStore();
 
     const [quantity, setQuantity] = useState('1');
     const [toastMsg, setToastMsg] = useState('');
+    const [searchInput, setSearchInput] = useState(symbol);
 
-    // 1.5초마다 가격 틱 발생
+    // 15초마다 실제 가격 틱 폴링
     useEffect(() => {
+        let isMounted = true;
+
+        const loadData = async () => {
+            try {
+                const data = await fetchCurrentData(symbol);
+                if (isMounted && data && data.length > 0) {
+                    updateLiveData(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch live data:', error);
+            }
+        };
+
+        // 초기 데이터 로드
+        loadData();
+
         const interval = setInterval(() => {
-            tickPrice();
-        }, 1500);
-        return () => clearInterval(interval);
-    }, [tickPrice]);
+            loadData();
+        }, 15000); // 15s polling to avoid rate limits
+
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [symbol, updateLiveData]);
 
     useEffect(() => {
         if (toastMsg) {
@@ -57,14 +82,41 @@ export function CurrentTradingScreen() {
         else setToastMsg('수량 부족');
     };
 
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const upper = searchInput.trim().toUpperCase();
+        if (upper && upper !== symbol) {
+            resetPortfolio();
+            setSymbol(upper);
+        }
+    };
+
     return (
         <div className="p-4 md:p-6 h-full flex flex-col space-y-6 overflow-y-auto">
-            <div className="flex items-center gap-2 mb-2">
-                <Activity className="text-blue-500 animate-pulse" />
-                <h2 className="text-2xl font-bold">실시간 가상 투자</h2>
-                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded text-xs font-bold shadow-sm">
-                    LIVE
-                </span>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
+                <div className="flex items-center gap-2">
+                    <Activity className="text-blue-500 animate-pulse" />
+                    <h2 className="text-2xl font-bold">실시간 실전 투자</h2>
+                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 rounded text-xs font-bold shadow-sm">
+                        LIVE
+                    </span>
+                </div>
+
+                <form onSubmit={handleSearchSubmit} className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <Input
+                            type="text"
+                            placeholder="종목코드 (예: 005930.KS, TSLA)"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            className="pl-9 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 uppercase"
+                        />
+                    </div>
+                    <Button type="submit" variant="primary" disabled={searchInput === symbol}>
+                        변경
+                    </Button>
+                </form>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -84,7 +136,7 @@ export function CurrentTradingScreen() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-gray-500 flex items-center gap-2">
                             <TrendingUp size={16} />
-                            보유 주식 가치
+                            보유 주식 가치 ({ownedQuantity}주)
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -120,13 +172,19 @@ export function CurrentTradingScreen() {
                 <div className="xl:col-span-2 flex flex-col gap-6">
                     <Card className="flex-1">
                         <CardHeader className="pb-2 flex flex-row items-center justify-between">
-                            <CardTitle>가상 종목 실시간 틱 차트</CardTitle>
+                            <CardTitle>{symbol} 실시간 차트</CardTitle>
                             <div className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                                {currentPrice.toLocaleString()} 원
+                                {currentPrice.toLocaleString()} {symbol.endsWith('.KS') || symbol.endsWith('.KQ') || symbol.endsWith('KRW') ? '원' : '포인트/USD'}
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <SimpleLineChart data={dataPoints} xKey="time" yKey="price" color="#f97316" />
+                            {dataPoints.length > 0 ? (
+                                <SimpleLineChart data={dataPoints} xKey="time" yKey="price" color="#f97316" />
+                            ) : (
+                                <div className="h-[300px] flex items-center justify-center text-gray-400">
+                                    데이터 조회 중이거나 차트 정보가 없습니다. 장 외 시간이거나 종목 코드를 확인해주세요.
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -137,7 +195,7 @@ export function CurrentTradingScreen() {
                         <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
                             <CardTitle className="text-lg font-bold flex items-center gap-2">
                                 <ShoppingCart size={20} className="text-orange-500" />
-                                호가 매매
+                                호가 매매 ({symbol})
                             </CardTitle>
                         </CardHeader>
 
@@ -175,7 +233,7 @@ export function CurrentTradingScreen() {
                                     variant="danger"
                                     size="lg"
                                     onClick={handleBuy}
-                                    disabled={numQuantity <= 0 || totalCost > balance}
+                                    disabled={numQuantity <= 0 || totalCost > balance || currentPrice <= 0}
                                     className="text-lg font-bold shadow-red-500/20 shadow-lg"
                                 >
                                     매수
@@ -192,7 +250,7 @@ export function CurrentTradingScreen() {
                             </div>
 
                             {toastMsg && (
-                                <div className="absolute top-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-md shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-2">
+                                <div className="absolute top-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-md shadow-lg text-sm font-medium animate-in fade-in slide-in-from-top-2 z-50">
                                     {toastMsg}
                                 </div>
                             )}

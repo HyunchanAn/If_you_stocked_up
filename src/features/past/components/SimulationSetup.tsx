@@ -3,22 +3,28 @@ import { useSimulationStore } from '../../../store/useSimulationStore';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui/Card';
-import { Coins, CalendarRange } from 'lucide-react';
+import { Coins, CalendarRange, Search, Loader2 } from 'lucide-react';
 import { addDays, format, differenceInDays } from 'date-fns';
 
 export function SimulationSetup() {
     const { setupSimulation } = useSimulationStore();
 
     // 기본값 설정 (과거 100일 전부터 오늘까지)
+    const [symbol, setSymbol] = useState('005930.KS');
     const [startDate, setStartDate] = useState(format(addDays(new Date(), -100), 'yyyy-MM-dd'));
     const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [seedMoney, setSeedMoney] = useState('10000000'); // 1000만 원
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleStart = () => {
+    const handleStart = async () => {
         const start = new Date(startDate);
         const end = new Date(endDate);
         const money = parseInt(seedMoney.replace(/[^0-9]/g, ''), 10);
 
+        if (!symbol.trim()) {
+            alert('종목 코드를 입력해주세요.');
+            return;
+        }
         if (start >= end) {
             alert('종료 날짜는 시작 날짜보다 미래여야 합니다.');
             return;
@@ -32,7 +38,20 @@ export function SimulationSetup() {
             return;
         }
 
-        setupSimulation(start, end, money);
+        setIsLoading(true);
+        try {
+            const symbolsArray = symbol.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+            if (symbolsArray.length === 0) {
+                alert('유효한 종목 코드를 입력해주세요.');
+                setIsLoading(false);
+                return;
+            }
+            await setupSimulation(symbolsArray, start, end, money);
+        } catch (error: any) {
+            alert('데이터를 불러오는데 실패했습니다: ' + (error.message || '알 수 없는 오류'));
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -48,6 +67,22 @@ export function SimulationSetup() {
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            종목 코드 (Yahoo Finance 기준)
+                        </label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <Input
+                                type="text"
+                                placeholder="예: 005930.KS, AAPL, TSLA"
+                                value={symbol}
+                                onChange={(e) => setSymbol(e.target.value)}
+                                className="pl-9 uppercase"
+                            />
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -90,10 +125,18 @@ export function SimulationSetup() {
                     </div>
 
                     <Button
-                        className="w-full h-12 text-lg shadow-blue-500/25 shadow-lg"
+                        className="w-full h-12 text-lg shadow-blue-500/25 shadow-lg flex items-center justify-center gap-2"
                         onClick={handleStart}
+                        disabled={isLoading}
                     >
-                        트레이딩 시작
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="animate-spin" size={20} />
+                                데이터 불러오는 중...
+                            </>
+                        ) : (
+                            '트레이딩 시작'
+                        )}
                     </Button>
                 </CardContent>
             </Card>

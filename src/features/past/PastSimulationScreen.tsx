@@ -46,22 +46,26 @@ export function PastSimulationScreen() {
             }
         }
 
-        // 매매 내역(Trade History) 병합
+        // 매매 내역(Trade History)을 날짜 기반 맵으로 변환 (O(M))
         const trades = activeSymbol && tradeHistory[activeSymbol] ? tradeHistory[activeSymbol] : [];
         if (trades.length === 0) return baseData;
 
-        return baseData.map(d => {
-            const dayTrades = trades.filter(t => t.date === d.date);
-            if (dayTrades.length === 0) return d;
+        const tradeMap: Record<string, { buy?: number; sell?: number }> = {};
+        for (const t of trades) {
+            if (!tradeMap[t.date]) tradeMap[t.date] = {};
+            if (t.type === 'buy') tradeMap[t.date].buy = t.price;
+            else if (t.type === 'sell') tradeMap[t.date].sell = t.price;
+        }
 
-            // 같은 날 여러 번 샀을 경우 마지막 거래 가격 혹은 평균을 보여줄 수 있음. 여기서는 마지막 거래를 표시.
-            const buyTrade = dayTrades.filter(t => t.type === 'buy').pop();
-            const sellTrade = dayTrades.filter(t => t.type === 'sell').pop();
+        // 단일 패스로 데이터 병합 (O(N))
+        return baseData.map(d => {
+            const dayTrade = tradeMap[d.date];
+            if (!dayTrade) return d;
 
             return {
                 ...d,
-                ...(buyTrade && { buyPrice: buyTrade.price }),
-                ...(sellTrade && { sellPrice: sellTrade.price })
+                ...((dayTrade.buy !== undefined) && { buyPrice: dayTrade.buy }),
+                ...((dayTrade.sell !== undefined) && { sellPrice: dayTrade.sell })
             };
         });
 

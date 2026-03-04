@@ -247,10 +247,10 @@ export function CandlestickChart({
                     />
 
                     {/* 비교 라인들 */}
-                    {showKospi && <Line yAxisId="right" type="monotone" dataKey="kospi" name="KOSPI" stroke="#8b5cf6" dot={false} strokeWidth={2} />}
-                    {showKosdaq && <Line yAxisId="right" type="monotone" dataKey="kosdaq" name="KOSDAQ" stroke="#ec4899" dot={false} strokeWidth={2} />}
-                    {showBitcoin && <Line yAxisId="right" type="monotone" dataKey="bitcoin" name="비트코인(BTC)" stroke="#f59e0b" dot={false} strokeWidth={2} />}
-                    {showGold && <Line yAxisId="right" type="monotone" dataKey="gold" name="금(Gold)" stroke="#eab308" dot={false} strokeWidth={2} />}
+                    {showKospi && <Line yAxisId="right" type="monotone" dataKey="kospi" name="KOSPI" stroke="#8b5cf6" dot={false} strokeWidth={2} isAnimationActive={false} />}
+                    {showKosdaq && <Line yAxisId="right" type="monotone" dataKey="kosdaq" name="KOSDAQ" stroke="#ec4899" dot={false} strokeWidth={2} isAnimationActive={false} />}
+                    {showBitcoin && <Line yAxisId="right" type="monotone" dataKey="bitcoin" name="비트코인(BTC)" stroke="#f59e0b" dot={false} strokeWidth={2} isAnimationActive={false} />}
+                    {showGold && <Line yAxisId="right" type="monotone" dataKey="gold" name="금(Gold)" stroke="#eab308" dot={false} strokeWidth={2} isAnimationActive={false} />}
 
                 </ComposedChart>
             </ResponsiveContainer>

@@ -12,9 +12,13 @@ interface CurrentTradingState {
     currentPrice: number;
     dataPoints: DataPoint[];
 
+    symbol: string;
+
     buy: (quantity: number) => boolean;
     sell: (quantity: number) => boolean;
-    tickPrice: () => void;
+    setSymbol: (sym: string) => void;
+    updateLiveData: (newDataPoints: DataPoint[]) => void;
+    resetPortfolio: () => void;
 }
 
 export const useCurrentTradingStore = create<CurrentTradingState>()((set: any, get: any) => ({
@@ -56,23 +60,26 @@ export const useCurrentTradingStore = create<CurrentTradingState>()((set: any, g
         return false;
     },
 
-    tickPrice: () => {
-        const { currentPrice, dataPoints } = get();
-        // -2% ~ +2% 변동
-        const changePercent = (Math.random() - 0.5) * 0.04;
-        const newPrice = Math.max(100, Math.round(currentPrice * (1 + changePercent)));
+    symbol: '005930.KS', // Default to Samsung
 
-        const newPoint = {
-            time: new Date().toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-            price: newPrice
-        };
+    setSymbol: (sym: string) => set({ symbol: sym }),
 
-        // 최근 50개 데이터만 유지
-        const newDataPoints = [...dataPoints, newPoint].slice(-50);
-
+    updateLiveData: (newDataPoints: DataPoint[]) => {
+        if (!newDataPoints || newDataPoints.length === 0) return;
+        const currentPrice = newDataPoints[newDataPoints.length - 1].price;
         set({
-            currentPrice: newPrice,
+            currentPrice,
             dataPoints: newDataPoints
+        });
+    },
+
+    resetPortfolio: () => {
+        set({
+            balance: 1000000,
+            ownedQuantity: 0,
+            averageBuyPrice: 0,
+            currentPrice: 0,
+            dataPoints: []
         });
     }
 }));

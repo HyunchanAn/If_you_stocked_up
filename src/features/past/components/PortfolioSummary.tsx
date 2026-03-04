@@ -3,15 +3,22 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../../components/ui
 import { Wallet, TrendingUp, PieChart } from 'lucide-react';
 
 export function PortfolioSummary() {
-    const { balance, ownedQuantity, averageBuyPrice, marketData, currentIndex, initialMoney } = useSimulationStore();
+    const { balance, portfolios, marketData, currentIndex, initialMoney } = useSimulationStore();
 
-    const currentPrice = marketData[currentIndex]?.price || 0;
-    const stockValue = ownedQuantity * currentPrice;
-    const totalAssets = balance + stockValue;
+    let totalStockValue = 0;
+    let totalInvested = 0;
+    let totalOwnedQuantity = 0;
 
-    const totalCost = ownedQuantity * averageBuyPrice;
-    const evaluationProfit = stockValue - totalCost;
-    const evaluationProfitRate = totalCost > 0 ? (evaluationProfit / totalCost) * 100 : 0;
+    Object.entries(portfolios).forEach(([sym, portfolio]) => {
+        const currentPrice = marketData[sym]?.[currentIndex]?.price || 0;
+        totalStockValue += portfolio.ownedQuantity * currentPrice;
+        totalInvested += portfolio.ownedQuantity * portfolio.averageBuyPrice;
+        totalOwnedQuantity += portfolio.ownedQuantity;
+    });
+
+    const totalAssets = balance + totalStockValue;
+    const evaluationProfit = totalStockValue - totalInvested;
+    const evaluationProfitRate = totalInvested > 0 ? (evaluationProfit / totalInvested) * 100 : 0;
 
     const totalProfit = totalAssets - initialMoney;
     const totalProfitRate = (totalProfit / initialMoney) * 100;
@@ -38,9 +45,9 @@ export function PortfolioSummary() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{Math.floor(stockValue).toLocaleString()} 원</div>
+                    <div className="text-2xl font-bold">{Math.floor(totalStockValue).toLocaleString()} 원</div>
                     <div className="text-sm mt-1">
-                        {ownedQuantity > 0 ? (
+                        {totalOwnedQuantity > 0 ? (
                             <span className={evaluationProfit >= 0 ? "text-red-500 dark:text-red-400" : "text-blue-500 dark:text-blue-400"}>
                                 {evaluationProfit >= 0 ? '+' : ''}{Math.floor(evaluationProfit).toLocaleString()} ({evaluationProfitRate.toFixed(2)}%)
                             </span>

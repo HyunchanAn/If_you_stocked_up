@@ -6,7 +6,10 @@ export function Header() {
 
     return (
         <header className="h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1e293b] flex items-center justify-between px-6 shrink-0 transition-colors">
-            <div className="flex items-center gap-2">
+            <div
+                className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => window.location.reload()}
+            >
                 <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
                     <TrendingUp size={20} />
                 </div>
@@ -21,8 +24,8 @@ export function Header() {
                     <button
                         onClick={() => setMode('PAST')}
                         className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${mode === 'PAST'
-                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
                         과거 (연습)
@@ -30,8 +33,8 @@ export function Header() {
                     <button
                         onClick={() => setMode('CURRENT')}
                         className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all ${mode === 'CURRENT'
-                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                     >
                         현재 (가상투자)
